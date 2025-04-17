@@ -3,12 +3,13 @@
 #Absolute imports used in this project to make it clear where things are coming from
 from flask import Flask, jsonify, request 
 from flask_sqlalchemy import SQLAlchemy
+import mysql.connector
 
 
 #Two blank lines to separate import and variables
 app = Flask(__name__)
 #For config keys as per PEP8 all are entered in Caps
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///travel.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://root:@localhost:3306/travel"
 
 #One blank line to separate variables and database
 db = SQLAlchemy(app)

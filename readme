@@ -1,0 +1,9 @@
+pip install -r requirements.txt
+
+
+mysql -u root -p
+
+"CREATE DATABASE travel;" #creating the new database
+exit;
+
+python3 main.py
