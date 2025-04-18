@@ -3,12 +3,15 @@
 #Absolute imports used in this project to make it clear where things are coming from
 from flask import Flask, jsonify, request 
 from flask_sqlalchemy import SQLAlchemy
+from flasgger import Swagger
+import mysql.connector
 
 
 #Two blank lines to separate import and variables
 app = Flask(__name__)
+swagger = Swagger(app)
 #For config keys as per PEP8 all are entered in Caps
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///travel.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://root:@localhost:3306/travel"
 
 #One blank line to separate variables and database
 db = SQLAlchemy(app)
@@ -45,6 +48,13 @@ with app.app_context():
 #Routes
 @app.route("/")
 def home():
+    """
+    Home route
+    ---
+    responses:
+      200:
+        description: Welcome message from the API
+    """
     #4 spaces for every level of indentation
     return jsonify({"message":"Welcome to the Travel API"})
 
@@ -52,6 +62,19 @@ def home():
 #Two blank lines to separate from routes
 @app.route("/destinations", methods=["GET"])
 def get_destinations():
+    """
+    Get all destinations
+    ---
+    tags:
+      - Destinations
+    responses:
+      200:
+        description: List of all destinations
+        schema:
+          type: array
+          items:
+            $ref: '#/definitions/Destination'
+    """
     #4 spaces for every level of indentation
     destinations = Destination.query.all()
     return jsonify([destination.to_dict() for destination in destinations])
@@ -60,6 +83,25 @@ def get_destinations():
 #Two blank lines to separate from above GET method
 @app.route("/destinations/<int:destination_id>", methods=["GET"])
 def get_destination(destination_id):
+    """
+    Get destination by ID
+    ---
+    tags:
+      - Destinations
+    parameters:
+      - name: destination_id
+        in: path
+        type: integer
+        required: true
+        description: ID of the destination
+    responses:
+      200:
+        description: Destination data
+        schema:
+          $ref: '#/definitions/Destination'
+      404:
+        description: Destination not found
+    """
     #4 spaces for every level of indentation
     destination = Destination.query.get(destination_id)
     if destination:
@@ -73,6 +115,37 @@ def get_destination(destination_id):
 #Two blank lines to separate from above GET method
 @app.route("/destinations", methods=["POST"])
 def add_destination():
+    """
+    Add a new destination
+    ---
+    tags:
+      - Destinations
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          id: Destination
+          required:
+            - destination
+            - country
+            - rating
+          properties:
+            destination:
+              type: string
+              description: Name of the destination
+            country:
+              type: string
+              description: Country of the destination
+            rating:
+              type: string
+              description: Rating of the destination
+    responses:
+      201:
+        description: Destination created successfully
+        schema:
+          $ref: '#/definitions/Destination'
+    """
     #4 spaces for every level of indentation
     data = request.get_json()
 
@@ -98,6 +171,36 @@ def add_destination():
 #Two blank lines to separate from above POST method
 @app.route("/destinations/<int:destination_id>", methods=["PUT"])
 def update_destination(destination_id):
+    """
+    Update a destination by ID
+    ---
+    tags:
+      - Destinations
+    parameters:
+      - name: destination_id
+        in: path
+        type: integer
+        required: true
+        description: ID of the destination to update
+      - in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            destination:
+              type: string
+            country:
+              type: string
+            rating:
+              type: string
+    responses:
+      200:
+        description: Destination updated successfully
+        schema:
+          $ref: '#/definitions/Destination'
+      404:
+        description: Destination not found
+    """
     #4 spaces for every level of indentation
     data = request.get_json()
     destination = Destination.query.get(destination_id)
@@ -119,6 +222,23 @@ def update_destination(destination_id):
 #Two blank lines to separate from above PUT method
 @app.route("/destinations/<int:destination_id>", methods=["DELETE"])
 def delete_destination(destination_id):
+    """
+    Delete a destination by ID
+    ---
+    tags:
+      - Destinations
+    parameters:
+      - name: destination_id
+        in: path
+        type: integer
+        required: true
+        description: ID of the destination to delete
+    responses:
+      200:
+        description: Destination deleted successfully
+      404:
+        description: Destination not found
+    """
     destination = Destination.query.get(destination_id)
     if destination:
         # 4 spaces for every level of indentation
